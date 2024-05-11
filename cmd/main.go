@@ -6,7 +6,10 @@ import (
 	"strings"
 )
 
-var binName string
+var (
+	binName string
+	folder  string
+)
 
 func createStr() string {
 	var b strings.Builder
@@ -32,13 +35,18 @@ func createStr() string {
 }
 
 func main() {
-	if len(os.Args) < 3 || len(os.Args) > 3 {
-		fmt.Println("error: bad args: <binName> <folder>")
+	if len(os.Args) < 2 || len(os.Args) > 3 {
+		fmt.Println("error: bad args: <binName> [optional]<folder>")
 		os.Exit(1)
 	}
 
+	if len(os.Args) == 2 {
+		folder = "."
+	} else {
+		folder = os.Args[2]
+	}
+
 	binName = os.Args[1]
-	folder := os.Args[2]
 
 	makeFile, err := os.Create(folder + "/Makefile")
 	if err != nil {
