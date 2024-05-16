@@ -1,64 +1,71 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
-	"strings"
+	"text/template"
 )
 
-var (
-	binName string
-	folder  string
-)
-
-func createStr() string {
-	var b strings.Builder
-
-	b.WriteString(fmt.Sprintf("binary-name=%s\n", binName))
-
-	b.WriteString("build:\n")
-	b.WriteString("\t\t@GOOS=darwin GOARCH=amd64 go build -o ./bin/${binary-name}-darwin ./cmd/main.go\n")
-	b.WriteString("\t\t@GOOS=windows GOARCH=amd64 go build -o ./bin/${binary-name}-windows.exe ./cmd/main.go\n")
-	b.WriteString("\t\t@GOOS=linux GOARCH=amd64 go build -o ./bin/${binary-name}-linux ./cmd/main.go\n")
-
-	b.WriteString("\n")
-
-	b.WriteString("run:build\n")
-	b.WriteString("\t\t@./bin/${binary-name}-linux\n")
-
-	b.WriteString("\n")
-
-	b.WriteString("clean:\n")
-	b.WriteString("\t\t@rm -rf ./bin/*\n\t\t@go clean")
-
-	return b.String()
+type FileOps struct {
+	BinName  string
+	Test     bool
+	Tailwind bool
+	Templ    bool
 }
 
+var fileStr string = `binary-name={{ .BinName }}
+
+build:{{ if .Templ }} templ-gen{{ end }}
+{{"\t"}}@GOOS=windows GOARCH=amd64 go build -o ./bin/${binary-name}-win.exe ./cmd/main.go
+{{"\t"}}@GOOS=linux GOARCH=amd64 go build -o ./bin/${binary-name}-linux ./cmd/main.go
+{{"\t"}}@GOOS=darwin GOARCH=amd64 go build -o ./bin/${binary-name}-darwin ./cmd/main.go
+
+run: build
+{{"\t"}}@./bin/${binary-name}-linux
+{{ if .Test }}
+test:
+{{"\t"}}@go test cmd/main.go
+{{ end }}
+clean:
+{{"\t"}}@rm -rf ./bin/*
+{{"\t"}}@go clean
+{{ if .Tailwind }}
+css-build:
+{{"\t"}}@tailwindcss -i ./static/css/input.css -o ./static/css/style.css
+
+css-watch:
+{{"\t"}}@tailwindcss -i ./static/css/input.css -o ./static/css/style.css --watch{{ end }}
+{{ if .Templ }}
+templ-gen:
+{{"\t"}}@templ generate
+
+templ-watch:
+{{"\t"}}@templ generate --watch{{ end }}`
+
 func main() {
-	if len(os.Args) < 2 || len(os.Args) > 3 {
-		fmt.Println("error: bad args: <binName> [optional]<folder>")
-		os.Exit(1)
+	binName := flag.String("n", "default", "binary-name")
+	folder := flag.String("d", ".", "directory name")
+	test := flag.Bool("t", false, "enable test")
+	tailwind := flag.Bool("tail", false, "enable tailwind")
+	tem := flag.Bool("templ", false, "enable templ")
+	flag.Parse()
+
+	data := FileOps{
+		BinName:  *binName,
+		Test:     *test,
+		Tailwind: *tailwind,
+		Templ:    *tem,
 	}
 
-	if len(os.Args) == 2 {
-		folder = "."
-	} else {
-		folder = os.Args[2]
-	}
-
-	binName = os.Args[1]
-
-	makeFile, err := os.Create(folder + "/Makefile")
+	makeFile, err := os.Create(*folder + "/Makefile")
 	if err != nil {
 		fmt.Println("error creating Makefile")
 		os.Exit(1)
 	}
 	defer makeFile.Close()
 
-	str := createStr()
-	_, err = makeFile.WriteString(str)
-	if err != nil {
-		fmt.Println("error: writing fail")
-		os.Exit(1)
-	}
+	templ := template.New("maketext")
+	templ.Parse(fileStr)
+	templ.ExecuteTemplate(makeFile, "maketext", data)
 }
