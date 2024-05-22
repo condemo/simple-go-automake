@@ -9,6 +9,7 @@ import (
 
 type FileOps struct {
 	BinName  string
+	Arm      bool
 	Test     bool
 	Tailwind bool
 	Templ    bool
@@ -23,6 +24,12 @@ build:{{ if .Templ }} templ-gen{{ end }}
 
 run: build
 {{"\t"}}@./bin/${binary-name}-linux
+{{if .Arm}}
+arm-build:
+{{"\t"}}@GOOS=linux GOARCH=arm64 go build -o ./bin/${binary-name}-arm64 ./cmd/main.go
+
+arm-run: arm-build
+{{"\t"}}@./bin/${binary-name}-arm64{{end}}
 {{ if .Test }}
 test:
 {{"\t"}}@go test cmd/main.go
@@ -46,6 +53,7 @@ templ-watch:
 func main() {
 	binName := flag.String("n", "default", "binary-name")
 	folder := flag.String("d", ".", "directory name")
+	arm := flag.Bool("arm", false, "enable arm build")
 	test := flag.Bool("t", false, "enable test")
 	tailwind := flag.Bool("tail", false, "enable tailwind")
 	tem := flag.Bool("templ", false, "enable templ")
@@ -53,6 +61,7 @@ func main() {
 
 	data := FileOps{
 		BinName:  *binName,
+		Arm:      *arm,
 		Test:     *test,
 		Tailwind: *tailwind,
 		Templ:    *tem,
