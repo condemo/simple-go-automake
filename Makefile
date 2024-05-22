@@ -6,7 +6,7 @@ build:
 run: build
 	@./bin/${binary-name}-linux
 
-install:
+install: build
 	@sudo cp ./bin/gomake /bin/gomake
 
 clean:
