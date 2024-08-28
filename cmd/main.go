@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
 	"text/template"
 )
 
@@ -14,6 +16,7 @@ type FileOps struct {
 	Test     bool
 	Tailwind bool
 	Templ    bool
+	Air      bool
 }
 
 var fileStr string = `binary-name={{ .BinName }}
@@ -59,6 +62,7 @@ func main() {
 	test := flag.Bool("t", false, "enable test")
 	tailwind := flag.Bool("tail", false, "enable tailwind")
 	tem := flag.Bool("templ", false, "enable templ")
+	air := flag.Bool("air", false, "enable air")
 	flag.Parse()
 
 	data := FileOps{
@@ -68,6 +72,7 @@ func main() {
 		Test:     *test,
 		Tailwind: *tailwind,
 		Templ:    *tem,
+		Air:      *air,
 	}
 
 	makeFile, err := os.Create(*folder + "/Makefile")
@@ -80,4 +85,18 @@ func main() {
 	templ := template.New("maketext")
 	templ.Parse(fileStr)
 	templ.ExecuteTemplate(makeFile, "maketext", data)
+
+	if *tailwind {
+		cmd := exec.Command("tailwindcss", "init")
+		if err := cmd.Run(); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if *air {
+		cmd := exec.Command("air", "init")
+		if err := cmd.Run(); err != nil {
+			log.Fatal(err)
+		}
+	}
 }
