@@ -88,6 +88,7 @@ func main() {
 
 	if *tailwind {
 		cmd := exec.Command("tailwindcss", "init")
+		cmd.Dir = *folder
 		if err := cmd.Run(); err != nil {
 			log.Fatal(err)
 		}
@@ -95,6 +96,7 @@ func main() {
 
 	if *air {
 		cmd := exec.Command("air", "init")
+		cmd.Dir = *folder
 		if err := cmd.Run(); err != nil {
 			log.Fatal(err)
 		}
