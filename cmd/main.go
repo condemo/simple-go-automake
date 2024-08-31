@@ -54,9 +54,14 @@ templ-build:
 templ-watch:
 {{"\t"}}@templ generate --watch{{ end }}`
 
+type AirData struct {
+	RootMain string
+}
+
+type TailwindData struct{}
+
 func main() {
 	binName := flag.String("n", "default", "binary-name")
-	folder := flag.String("d", ".", "directory name")
 	binf := flag.String("b", "./cmd/main.go", "route to main go file")
 	arm := flag.Bool("arm", false, "enable arm build")
 	test := flag.Bool("t", false, "enable test")
@@ -75,7 +80,7 @@ func main() {
 		Air:      *air,
 	}
 
-	makeFile, err := os.Create(*folder + "/Makefile")
+	makeFile, err := os.Create("./Makefile")
 	if err != nil {
 		fmt.Println("error creating Makefile")
 		os.Exit(1)
@@ -86,19 +91,50 @@ func main() {
 	templ.Parse(fileStr)
 	templ.ExecuteTemplate(makeFile, "maketext", data)
 
+	// homeDir, err := os.UserHomeDir()
+	checkErr(err)
+	// shareDir := homeDir + "/.local/share/gomake"
+
 	if *tailwind {
 		cmd := exec.Command("tailwindcss", "init")
-		cmd.Dir = *folder
+		cmd.Dir = "."
 		if err := cmd.Run(); err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	if *air {
-		cmd := exec.Command("air", "init")
-		cmd.Dir = *folder
-		if err := cmd.Run(); err != nil {
-			log.Fatal(err)
-		}
+		// cmd := exec.Command("air", "init")
+		// cmd.Dir = *folder
+		// if err := cmd.Run(); err != nil {
+		// 	log.Fatal(err)
+		// }
+
+		// airTempPath := shareDir + "/air.tmpl"
+		airPath := "./.air.toml"
+		//
+		// if _, err := os.Stat(airTempPath); err != nil {
+		// 	err = os.Mkdir(shareDir, os.ModePerm)
+		// 	checkErr(err)
+		// 	f, err := os.Create(airTempPath)
+		// 	checkErr(err)
+		// 	fmt.Println("creando template")
+		// 	f.Close()
+		// }
+
+		airFile, err := os.Create(airPath)
+		checkErr(err)
+		defer airFile.Close()
+
+		airtempl, err := template.ParseFiles("templates/air.tmpl")
+		checkErr(err)
+
+		airtempl.Execute(airFile, AirData{RootMain: *binf})
+	}
+}
+
+func checkErr(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
 }
