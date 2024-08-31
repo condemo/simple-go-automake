@@ -91,9 +91,7 @@ func main() {
 	templ.Parse(fileStr)
 	templ.ExecuteTemplate(makeFile, "maketext", data)
 
-	// homeDir, err := os.UserHomeDir()
 	checkErr(err)
-	// shareDir := homeDir + "/.local/share/gomake"
 
 	if *tailwind {
 		cmd := exec.Command("tailwindcss", "init")
@@ -104,23 +102,7 @@ func main() {
 	}
 
 	if *air {
-		// cmd := exec.Command("air", "init")
-		// cmd.Dir = *folder
-		// if err := cmd.Run(); err != nil {
-		// 	log.Fatal(err)
-		// }
-
-		// airTempPath := shareDir + "/air.tmpl"
 		airPath := "./.air.toml"
-		//
-		// if _, err := os.Stat(airTempPath); err != nil {
-		// 	err = os.Mkdir(shareDir, os.ModePerm)
-		// 	checkErr(err)
-		// 	f, err := os.Create(airTempPath)
-		// 	checkErr(err)
-		// 	fmt.Println("creando template")
-		// 	f.Close()
-		// }
 
 		airFile, err := os.Create(airPath)
 		checkErr(err)
