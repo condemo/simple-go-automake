@@ -14,7 +14,7 @@ type AirData struct {
 	RootMain string
 }
 
-func MakeAirFile(mfRoute string) {
+func MakeAirFile(d AirData) {
 	airPath := "./.air.toml"
 
 	airFile, err := os.Create(airPath)
@@ -23,7 +23,7 @@ func MakeAirFile(mfRoute string) {
 
 	airtempl := template.New("air")
 	airtempl.Parse(s)
-	airtempl.Execute(airFile, AirData{RootMain: mfRoute})
+	airtempl.Execute(airFile, d)
 }
 
 func checkErr(err error) {

@@ -106,7 +106,8 @@ func main() {
 	}
 
 	if *air {
-		templates.MakeAirFile(*binf)
+		ad := templates.AirData{RootMain: *binf}
+		templates.MakeAirFile(ad)
 	}
 }
 
