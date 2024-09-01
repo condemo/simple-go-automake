@@ -2,11 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
-	"os"
 	"os/exec"
-	"text/template"
 
 	"github.com/condemo/simple-go-automake/templates"
 )
@@ -15,51 +12,6 @@ import (
 // conviene empezar a separar la movidas
 // por ejemplo: mover el string a un tmpl file y la funcionalidad
 // al modulo templates/
-
-type FileOps struct {
-	BinName  string
-	BinRoute string
-	Arm      bool
-	Test     bool
-	Tailwind bool
-	Templ    bool
-	Air      bool
-}
-
-var fileStr string = `binary-name={{ .BinName }}
-
-build:{{ if .Templ }} templ-build{{ end }}
-{{"\t"}}@GOOS=windows GOARCH=amd64 go build -o ./bin/${binary-name}-win.exe {{ .BinRoute }}
-{{"\t"}}@GOOS=linux GOARCH=amd64 go build -o ./bin/${binary-name}-linux {{ .BinRoute }}
-{{"\t"}}@GOOS=darwin GOARCH=amd64 go build -o ./bin/${binary-name}-darwin {{ .BinRoute }}
-
-run: build
-{{"\t"}}@./bin/${binary-name}-linux
-{{if .Arm}}
-arm-build:
-{{"\t"}}@GOOS=linux GOARCH=arm64 go build -o ./bin/${binary-name}-arm64 {{ .BinRoute }}
-
-arm-run: arm-build
-{{"\t"}}@./bin/${binary-name}-arm64{{end}}
-{{ if .Test }}
-test:
-{{"\t"}}@go test {{ .BinRoute }}
-{{ end }}
-clean:
-{{"\t"}}@rm -rf ./bin/*
-{{"\t"}}@go clean
-{{ if .Tailwind }}
-css-build:
-{{"\t"}}@tailwindcss -i ./static/css/input.css -o ./static/css/style.css
-
-css-watch:
-{{"\t"}}@tailwindcss -i ./static/css/input.css -o ./static/css/style.css --watch{{ end }}
-{{ if .Templ }}
-templ-build:
-{{"\t"}}@templ generate
-
-templ-watch:
-{{"\t"}}@templ generate --watch{{ end }}`
 
 func main() {
 	binName := flag.String("n", "default", "binary-name")
@@ -71,7 +23,7 @@ func main() {
 	air := flag.Bool("air", false, "enable air")
 	flag.Parse()
 
-	data := FileOps{
+	data := templates.FileOps{
 		BinName:  *binName,
 		BinRoute: *binf,
 		Arm:      *arm,
@@ -80,19 +32,7 @@ func main() {
 		Templ:    *tem,
 		Air:      *air,
 	}
-
-	makeFile, err := os.Create("./Makefile")
-	if err != nil {
-		fmt.Println("error creating Makefile")
-		os.Exit(1)
-	}
-	defer makeFile.Close()
-
-	templ := template.New("maketext")
-	templ.Parse(fileStr)
-	templ.ExecuteTemplate(makeFile, "maketext", data)
-
-	checkErr(err)
+	templates.CreateMakeFile(data)
 
 	if *tailwind {
 		// TODO: Cambiar esto y hacer que el archivo se cree usando template

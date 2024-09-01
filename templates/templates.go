@@ -2,10 +2,37 @@ package templates
 
 import (
 	_ "embed"
+	"fmt"
 	"html/template"
 	"log"
 	"os"
 )
+
+//go:embed make.tmpl
+var fileStr string
+
+type FileOps struct {
+	BinName  string
+	BinRoute string
+	Arm      bool
+	Test     bool
+	Tailwind bool
+	Templ    bool
+	Air      bool
+}
+
+func CreateMakeFile(d FileOps) {
+	makeFile, err := os.Create("./Makefile")
+	if err != nil {
+		fmt.Println("error creating Makefile")
+		os.Exit(1)
+	}
+	defer makeFile.Close()
+
+	templ := template.New("maketext")
+	templ.Parse(fileStr)
+	templ.ExecuteTemplate(makeFile, "maketext", d)
+}
 
 //go:embed air.tmpl
 var s string
