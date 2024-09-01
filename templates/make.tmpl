@@ -22,10 +22,10 @@ clean:
 {{"\t"}}@go clean
 {{ if .Tailwind }}
 css-build:
-{{"\t"}}@tailwindcss -i ./static/css/input.css -o ./static/css/style.css
+{{"\t"}}@tailwindcss -i ./public/static/css/input.css -o ./public/static/css/style.css
 
 css-watch:
-{{"\t"}}@tailwindcss -i ./static/css/input.css -o ./static/css/style.css --watch{{ end }}
+{{"\t"}}@tailwindcss -i ./public/static/css/input.css -o ./public/static/css/style.css --watch{{ end }}
 {{ if .Templ }}
 templ-build:
 {{"\t"}}@templ generate
