@@ -41,7 +41,7 @@ type AirData struct {
 	RootMain string
 }
 
-func MakeAirFile(d AirData) {
+func CreateAirFile(d AirData) {
 	airPath := "./.air.toml"
 
 	airFile, err := os.Create(airPath)
@@ -64,8 +64,14 @@ var t string
 
 type TailwindData struct{}
 
-func MakeTailwindFile() {
-	// TODO: Modificar el template para cargar los datos dinámicos
+func CreateTailwindFile(td TailwindData) {
+	tailPath := "./tailwind.config.js"
 
-	// TODO: Seguir con la implementación para automatizar tailwind
+	tailFile, err := os.Create(tailPath)
+	checkErr(err)
+	defer tailFile.Close()
+
+	airtempl := template.New("tailwind")
+	airtempl.Parse(t)
+	airtempl.Execute(tailFile, td)
 }

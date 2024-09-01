@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
-	"os/exec"
 
 	"github.com/condemo/simple-go-automake/templates"
 )
@@ -35,24 +33,13 @@ func main() {
 	templates.CreateMakeFile(data)
 
 	if *tailwind {
-		// TODO: Cambiar esto y hacer que el archivo se cree usando template
-		// no hay necesidad de tirar el comando de tailwind
-		cmd := exec.Command("tailwindcss", "init")
-		cmd.Dir = "."
-		if err := cmd.Run(); err != nil {
-			log.Fatal(err)
-		}
-		templates.MakeTailwindFile()
+		// TODO: Añadir flags para configurar tailwind, daisyui ...
+		td := templates.TailwindData{}
+		templates.CreateTailwindFile(td)
 	}
 
 	if *air {
 		ad := templates.AirData{RootMain: *binf}
-		templates.MakeAirFile(ad)
-	}
-}
-
-func checkErr(err error) {
-	if err != nil {
-		log.Fatal(err)
+		templates.CreateAirFile(ad)
 	}
 }
