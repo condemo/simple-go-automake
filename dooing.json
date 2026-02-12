@@ -1,0 +1,1 @@
+[{"done":false,"created_at":1770909786,"category":"","in_progress":false,"notes":"","text":"hacer que cree en archivo main al ejecutarse","id":"1770909786_5925","depth":0},{"done":false,"created_at":1770909817,"category":"","in_progress":false,"notes":"","text":"ejecutar `go mod init...` al usar gomake","id":"1770909817_6738","depth":0}]
