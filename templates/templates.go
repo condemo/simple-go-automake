@@ -27,11 +27,19 @@ func CreateMakeFile(d FileOps) {
 		fmt.Println("error creating Makefile")
 		os.Exit(1)
 	}
-	defer makeFile.Close()
+	defer func() {
+		if err := makeFile.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	templ := template.New("maketext")
-	templ.Parse(fileStr)
-	templ.ExecuteTemplate(makeFile, "maketext", d)
+	if _, err := templ.Parse(fileStr); err != nil {
+		checkErr(err, "makefile templ parse failed")
+	}
+	if err := templ.ExecuteTemplate(makeFile, "maketext", d); err != nil {
+		checkErr(err, "makefile templ execute failed")
+	}
 }
 
 //go:embed air.tmpl
@@ -45,17 +53,25 @@ func CreateAirFile(d AirData) {
 	airPath := "./.air.toml"
 
 	airFile, err := os.Create(airPath)
-	checkErr(err)
-	defer airFile.Close()
+	checkErr(err, "airFile creation failed")
+	defer func() {
+		if err := airFile.Close(); err != nil {
+			checkErr(err, "airFile closing failed")
+		}
+	}()
 
 	airtempl := template.New("air")
-	airtempl.Parse(s)
-	airtempl.Execute(airFile, d)
+	if _, err := airtempl.Parse(s); err != nil {
+		checkErr(err, "air templ parse failed")
+	}
+	if err := airtempl.Execute(airFile, d); err != nil {
+		checkErr(err, "air templ execute failed")
+	}
 }
 
-func checkErr(err error) {
+func checkErr(err error, msg string) {
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%s: %s", msg, err)
 	}
 }
 
@@ -68,10 +84,18 @@ func CreateTailwindFile(td TailwindData) {
 	tailPath := "./tailwind.config.js"
 
 	tailFile, err := os.Create(tailPath)
-	checkErr(err)
-	defer tailFile.Close()
+	checkErr(err, "tailwind file creation failed")
+	defer func() {
+		if err := tailFile.Close(); err != nil {
+			checkErr(err, "tailFile closing failed")
+		}
+	}()
 
-	airtempl := template.New("tailwind")
-	airtempl.Parse(t)
-	airtempl.Execute(tailFile, td)
+	tailwindTempl := template.New("tailwind")
+	if _, err := tailwindTempl.Parse(t); err != nil {
+		checkErr(err, "tailwind templ parse failed")
+	}
+	if err := tailwindTempl.Execute(tailFile, td); err != nil {
+		checkErr(err, "tailwind templ execute failed")
+	}
 }
