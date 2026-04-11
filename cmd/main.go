@@ -50,21 +50,23 @@ func main() {
 		templates.CreateAirFile(ad)
 	}
 
-	createFiles(*mainPath)
+	if err := createFiles(*mainPath); err != nil {
+		log.Fatalf("error creating main.go file and folder: %s", err)
+	}
 }
 
 // TODO:
-func createFiles(mainPath string) {
+func createFiles(mainPath string) error {
 	dir, _ := filepath.Split(mainPath)
 	_, err := exec.Command("mkdir", dir).Output()
 	if err != nil {
-		log.Fatalf("mkdir failed: %s", err)
+		return err
 	}
 	fmt.Println("main folder created")
 
 	f, err := os.Create(mainPath)
 	if err != nil {
-		log.Fatalf("main.go creation failed: %s", err)
+		return err
 	}
 	defer func() {
 		if err := f.Close(); err != nil {
@@ -73,7 +75,8 @@ func createFiles(mainPath string) {
 	}()
 
 	if _, err := f.WriteString(templates.MainTempl); err != nil {
-		log.Fatalf("write to main.go failed: %s", err)
+		return err
 	}
 	fmt.Println("main.go created")
+	return nil
 }
