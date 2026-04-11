@@ -19,6 +19,7 @@ func main() {
 	tailwind := flag.Bool("tail", false, "enable tailwind")
 	tem := flag.Bool("templ", false, "enable templ")
 	air := flag.Bool("air", false, "enable air")
+	gooseMig := flag.Bool("goose", false, "enable goose migrations")
 	flag.Parse()
 
 	data := templates.FileOps{
@@ -29,6 +30,7 @@ func main() {
 		Tailwind: *tailwind,
 		Templ:    *tem,
 		Air:      *air,
+		GooseMig: *gooseMig,
 	}
 	templates.CreateMakeFile(data)
 

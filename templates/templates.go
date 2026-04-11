@@ -19,6 +19,7 @@ type FileOps struct {
 	Tailwind bool
 	Templ    bool
 	Air      bool
+	GooseMig bool
 }
 
 func CreateMakeFile(d FileOps) {

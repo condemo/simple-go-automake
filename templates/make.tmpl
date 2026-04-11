@@ -15,7 +15,7 @@ arm-run: arm-build
 {{"\t"}}@./bin/${binary-name}-arm64{{end}}
 {{ if .Test }}
 test:
-{{"\t"}}@go test {{ .BinRoute }}
+{{"\t"}}@go test ./... -v -count=1{{ .BinRoute }}
 {{ end }}
 clean:
 {{"\t"}}@rm -rf ./bin/*
@@ -29,6 +29,11 @@ css-watch:
 {{ if .Templ }}
 templ-build:
 {{"\t"}}@templ generate
-
 templ-watch:
 {{"\t"}}@templ generate --watch{{ end }}
+{{if .GooseMig}}
+goose-up:
+{{"\t"}}@goose up
+goose-down:
+{{"\t"}}@goose down
+{{end}}
