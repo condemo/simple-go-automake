@@ -100,3 +100,6 @@ func CreateTailwindFile(td TailwindData) {
 		checkErr(err, "tailwind templ execute failed")
 	}
 }
+
+//go:embed mainFile.tmpl
+var MainTempl string

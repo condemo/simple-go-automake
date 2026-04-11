@@ -2,6 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
 
 	"github.com/condemo/simple-go-automake/templates"
 )
@@ -13,7 +18,7 @@ import (
 
 func main() {
 	binName := flag.String("n", "default", "binary-name")
-	binf := flag.String("b", "./cmd/main.go", "route to main go file")
+	mainPath := flag.String("b", "./cmd/main.go", "route to main go file")
 	arm := flag.Bool("arm", false, "enable arm build")
 	test := flag.Bool("t", false, "enable test")
 	tailwind := flag.Bool("tail", false, "enable tailwind")
@@ -24,7 +29,7 @@ func main() {
 
 	data := templates.FileOps{
 		BinName:  *binName,
-		BinRoute: *binf,
+		BinRoute: *mainPath,
 		Arm:      *arm,
 		Test:     *test,
 		Tailwind: *tailwind,
@@ -41,7 +46,34 @@ func main() {
 	}
 
 	if *air {
-		ad := templates.AirData{RootMain: *binf}
+		ad := templates.AirData{RootMain: *mainPath}
 		templates.CreateAirFile(ad)
 	}
+
+	createFiles(*mainPath)
+}
+
+// TODO:
+func createFiles(mainPath string) {
+	dir, _ := filepath.Split(mainPath)
+	_, err := exec.Command("mkdir", dir).Output()
+	if err != nil {
+		log.Fatalf("mkdir failed: %s", err)
+	}
+	fmt.Println("main folder created")
+
+	f, err := os.Create(mainPath)
+	if err != nil {
+		log.Fatalf("main.go creation failed: %s", err)
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Fatalf("main.go closing failed: %s", err)
+		}
+	}()
+
+	if _, err := f.WriteString(templates.MainTempl); err != nil {
+		log.Fatalf("write to main.go failed: %s", err)
+	}
+	fmt.Println("main.go created")
 }
