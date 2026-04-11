@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/condemo/simple-go-automake/templates"
@@ -58,7 +57,7 @@ func main() {
 // TODO:
 func createFiles(mainPath string) error {
 	dir, _ := filepath.Split(mainPath)
-	_, err := exec.Command("mkdir", dir).Output()
+	err := os.MkdirAll(dir, 0o755)
 	if err != nil {
 		return err
 	}
